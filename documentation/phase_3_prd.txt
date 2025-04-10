@@ -1,0 +1,105 @@
+# Jarvis - Product Requirements Document - Phase 3
+
+**Phase:** 3 - Foundational Agent Framework & Expanded Capabilities
+**Version:** 1.0
+**Date:** 2024-07-28
+
+## 1. Goals
+
+*   Introduce the initial structure of the agentic framework, specifically the Triage -> Orchestrator pattern.
+*   Enable the Orchestrator to delegate tasks to a basic, general-purpose "Task Agent" or directly utilize more complex tools.
+*   Implement a significant new capability through tool use, such as web search.
+*   Refine the backend architecture to support this more complex flow.
+*   Provide clearer feedback to the user about background task processing.
+
+## 2. Features
+
+*   **F3.1: Backend Triage Logic:**
+    *   Component (or logic within the main request handler) that analyzes incoming user requests (text and/or transcription).
+    *   Uses heuristics or a simple LLM call to determine if the request can be handled by a direct AI response (with context from Phase 1 memory) or if it requires delegation due to complexity or need for external information/action.
+*   **F3.2: Backend Orchestrator Enhancement:**
+    *   Refactor the rudimentary orchestrator from Phase 2.
+    *   Receives tasks delegated from the Triage logic.
+    *   Decides *how* to fulfill the task: either by invoking a specific tool directly or by passing the task to a basic Task Agent.
+    *   Manages the state of the delegated task (e.g., pending, in-progress, completed, failed).
+*   **F3.3: Basic Task Agent Implementation:**
+    *   Implement a simple, general-purpose Task Agent component on the backend.
+    *   Receives a task description from the Orchestrator.
+    *   Capable of using a defined set of tools (initially including the Phase 2 tools and the new web search tool) to accomplish the task.
+    *   Returns the result (or failure status) back to the Orchestrator.
+    *   This is *not* the full hierarchical PM -> Task Agent structure yet.
+*   **F3.4: Web Search Tool Integration:**
+    *   Integrate a web search tool (e.g., using Tavily API, SerpApi, or similar).
+    *   Define the tool's schema for OpenAI (`name`, `description`, `parameters` like `query`).
+    *   Implement the backend logic to securely call the search API using the query provided by the AI/Task Agent.
+    *   Process and return the search results in a format suitable for the AI/Task Agent (e.g., list of snippets).
+    *   Make this tool available to the Task Agent and potentially directly callable by the Orchestrator.
+*   **F3.5: Frontend Task Status Feedback:**
+    *   Enhance the frontend UI to provide clearer visual feedback when Jarvis is working on a delegated task in the background.
+    *   Examples: A status indicator ("Jarvis is searching the web..."), updates in the chat log, or a dedicated status area.
+    *   Receive status updates from the backend Orchestrator.
+
+## 3. Tasks & Subtasks
+
+*   **T3.1: Implement Triage Logic:**
+    *   T3.1.1: Design the input analysis process (e.g., keyword detection, prompt for an LLM to classify request complexity).
+    *   T3.1.2: Implement the backend code for the Triage component/logic.
+    *   T3.1.3: Integrate Triage into the main request handling flow.
+    *   T3.1.4: Create unit test for Triage logic (verify correct classification of simple vs. complex requests based on simulated inputs).
+    *   T3.1.5: Run Triage logic test and confirm pass.
+*   **T3.2: Refactor and Enhance Orchestrator:**
+    *   T3.2.1: Redesign the Orchestrator to handle delegated tasks from Triage.
+    *   T3.2.2: Implement state management for ongoing tasks (e.g., using a database or in-memory store with persistence strategy).
+    *   T3.2.3: Implement the logic for deciding between direct tool call vs. Task Agent delegation.
+    *   T3.2.4: Define communication interface between Orchestrator and Task Agent.
+    *   T3.2.5: Create unit/integration tests for enhanced Orchestrator (verify task reception from Triage, state management, correct delegation to tool/Task Agent).
+    *   T3.2.6: Run enhanced Orchestrator tests and confirm pass.
+*   **T3.3: Implement Basic Task Agent:**
+    *   T3.3.1: Define the structure and interface for the Task Agent.
+    *   T3.3.2: Implement the core logic for receiving tasks and results.
+    *   T3.3.3: Implement the mechanism for the Task Agent to call available tools (Phase 2 tools + Web Search).
+    *   T3.3.4: Handle returning results/errors to the Orchestrator.
+    *   T3.3.5: Create unit test for Basic Task Agent logic (verify task reception, tool invocation mechanism, result/error propagation).
+    *   T3.3.6: Run Basic Task Agent test and confirm pass.
+*   **T3.4: Integrate Web Search Tool:**
+    *   T3.4.1: Choose and obtain API key for a web search service.
+    *   T3.4.2: Define the `web_search` tool schema on the backend.
+    *   T3.4.3: Add `web_search` to the list of tools sent to OpenAI during session setup.
+    *   T3.4.4: Implement the backend function to call the search API, handle authentication, and process results.
+    *   T3.4.5: Handle errors from the search API call.
+    *   T3.4.6: Ensure the Task Agent (and/or Orchestrator) can invoke this tool.
+    *   T3.4.7: Create integration test for the `web_search` tool function (requires mocking the external API or careful live testing).
+    *   T3.4.8: Run `web_search` tool function test and confirm pass.
+*   **T3.5: Implement Frontend Status Feedback:**
+    *   T3.5.1: Design the UI elements for displaying background task status.
+    *   T3.5.2: Implement backend logic in the Orchestrator to send status update events to the frontend.
+    *   T3.5.3: Implement frontend logic to receive these status updates and update the UI accordingly.
+    *   T3.5.4: Create frontend component test for status display elements (verify UI updates based on simulated status events).
+    *   T3.5.5: Run status display component test and confirm pass.
+*   **T3.6: End-to-End (E2E) and Manual Testing:**
+    *   T3.6.1: Manually/E2E test Triage logic (simple vs. complex requests).
+    *   T3.6.2: Manually/E2E test Orchestrator task handling and state management for delegated tasks.
+    *   T3.6.3: Manually/E2E test Task Agent execution and web search tool usage.
+    *   T3.6.4: Manually/E2E test the full flow: User Request -> Triage -> Orchestrator -> Task Agent -> Web Search -> Result -> Orchestrator -> AI Summary -> Frontend.
+    *   T3.6.5: Manually/E2E test frontend status updates during background tasks.
+    *   T3.6.6: Manually/E2E test error handling within the agent/tool flow (e.g., search API failure).
+*   **T3.7: Document Phase 3 Implementation:**
+    *   T3.7.1: Update `documentation/jarvis_documentation/backend_documentation.md` with details on the Triage logic, enhanced Orchestrator, the Basic Task Agent implementation, and the web search tool integration.
+    *   T3.7.2: Create/Update `documentation/jarvis_documentation/specialized_agents_inventory.md` to list and describe the Basic Task Agent and the tools it can use (including web search).
+    *   T3.7.3: Update `documentation/jarvis_documentation/frontend_documentation.md` describing the UI changes for background task status feedback.
+    *   T3.7.4: Update `documentation/jarvis_documentation/jarvis_architecture.md` to illustrate the Triage -> Orchestrator -> Basic Task Agent flow, including tool usage like web search.
+    *   T3.7.5: Ensure `documentation/jarvis_documentation/README.md` reflects Phase 3 completion status.
+
+## 4. Assumptions
+
+*   Phase 1 & 2 features are implemented and stable.
+*   Availability of a web search API key.
+*   Understanding of basic agentic concepts (delegation, task execution).
+
+## 5. Out of Scope for Phase 3
+
+*   Full hierarchical agent framework (PM -> Task Agents).
+*   Persistent memory across sessions / Personalization.
+*   Advanced agent capabilities (vision, complex planning, self-correction).
+*   External access / Deployment.
+*   Proactive features. 

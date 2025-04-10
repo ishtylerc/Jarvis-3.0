@@ -1,0 +1,101 @@
+# Jarvis - Product Requirements Document - Phase 2
+
+**Phase:** 2 - Simple Tool Integration & Rudimentary Agent
+**Version:** 1.0
+**Date:** 2024-07-28
+
+## 1. Goals
+
+*   Extend the backend to support OpenAI function calling/tool use.
+*   Implement the logic for at least one simple tool (e.g., the `display_color_palette` example).
+*   Introduce a rudimentary "Orchestrator" concept in the backend to manage the decision of when to call a tool based on AI response.
+*   Refine the frontend (`ToolPanel.jsx` or similar) to correctly display tool inputs/outputs and interact with the backend for tool execution status.
+*   Improve the robustness and error handling of the core communication layer built in Phase 1.
+
+## 2. Features
+
+*   **F2.1: Backend Tool Definition & Registration:**
+    *   Mechanism on the backend to define available tools/functions (like `display_color_palette`) in the format expected by the OpenAI API (JSON schema for name, description, parameters).
+    *   Logic to send these tool definitions to OpenAI during session setup (likely via a `session.update` event through the data channel, similar to the original `ToolPanel.jsx` example).
+*   **F2.2: Backend Tool Call Detection & Execution:**
+    *   Backend logic to parse incoming AI messages (specifically `response.done` events) to detect `function_call` outputs.
+    *   Rudimentary "Orchestrator" logic: When a `function_call` is detected, prevent sending the raw function call to the frontend. Instead, trigger the corresponding backend tool execution logic.
+    *   Implement the actual backend logic for the example tool (`display_color_palette`). Initially, this might just generate static data or perform a simple calculation.
+*   **F2.3: Backend Tool Result Handling:**
+    *   After the backend tool logic executes, formulate a `tool_result` message containing the output.
+    *   Send this `tool_result` back to OpenAI (via the data channel) to allow the AI to process the result and generate a final user-facing response.
+    *   Optionally: Send status updates about tool execution to the frontend (e.g., "Executing color palette tool...").
+*   **F2.4: Frontend Tool Visualization (`ToolPanel.jsx` Enhancement):**
+    *   Enhance `ToolPanel.jsx` (or create a dedicated component) to:
+        *   Receive information about available tools from the backend (if needed, though definitions are primarily for OpenAI).
+        *   Receive status updates about ongoing tool execution from the backend.
+        *   Receive the *final* user-facing AI response *after* the tool has been called and the AI has summarized the result (rather than displaying the raw `function_call` as in the original example).
+        *   Potentially display the arguments used for the tool call and the result obtained for debugging/transparency, but the primary display should be the AI's summary.
+*   **F2.5: Enhanced Error Handling:**
+    *   Improve error handling for WebRTC connection issues (e.g., connection failed, disconnected unexpectedly).
+    *   Add error handling for the `/token` endpoint (e.g., invalid key, OpenAI auth issues).
+    *   Add error handling for tool execution failures on the backend.
+    *   Provide clearer feedback to the user on the frontend when errors occur.
+
+## 3. Tasks & Subtasks
+
+*   **T2.1: Implement Backend Tool Definition:**
+    *   T2.1.1: Define the JSON schema for `display_color_palette` (and potentially 1-2 other simple tools) in the backend code.
+    *   T2.1.2: Implement logic to create the `session.update` event payload containing these tool definitions.
+    *   T2.1.3: Integrate sending this `session.update` event during the session initialization phase (after data channel opens).
+    *   T2.1.4: Create unit test for tool definition payload generation.
+    *   T2.1.5: Run tool definition payload test and confirm pass.
+*   **T2.2: Implement Backend Tool Execution Logic:**
+    *   T2.2.1: Modify backend data channel message handler to specifically parse `response.done` events for `function_call` outputs.
+    *   T2.2.2: Implement the "Orchestrator" logic: If `function_call` detected, route to tool execution instead of forwarding to frontend.
+    *   T2.2.3: Write the backend function for `display_color_palette` (e.g., return a hardcoded palette or generate one based on a simple rule).
+    *   T2.2.4: Define a clear interface/pattern for adding new tools in the future.
+    *   T2.2.5: Create unit test for the `display_color_palette` tool function itself.
+    *   T2.2.6: Run `display_color_palette` tool function test and confirm pass.
+    *   T2.2.7: Create unit/integration test for the Orchestrator logic (detecting `function_call`, routing to the correct tool function).
+    *   T2.2.8: Run Orchestrator logic test and confirm pass.
+*   **T2.3: Implement Backend Tool Result Processing:**
+    *   T2.3.1: Construct the `tool_result` event payload based on the output of the executed tool function.
+    *   T2.3.2: Implement logic to send the `tool_result` event back to OpenAI via the data channel.
+    *   T2.3.3: (Optional) Implement mechanism to send intermediate status updates (e.g., "Running tool X") to the frontend.
+    *   T2.3.4: Create unit test for `tool_result` payload generation.
+    *   T2.3.5: Run `tool_result` payload test and confirm pass.
+*   **T2.4: Enhance Frontend Tool Visualization:**
+    *   T2.4.1: Refactor `ToolPanel.jsx` to no longer directly handle `function_call` events from OpenAI.
+    *   T2.4.2: Add UI elements to display tool execution status received from the backend (if implemented).
+    *   T2.4.3: Ensure the main conversation display correctly shows the AI's final response after a tool call.
+    *   T2.4.4: (Optional) Add a separate debug/log section in the tool panel.
+    *   T2.4.5: Create frontend component test for the updated `ToolPanel` (verify status updates, correct display of AI summary, absence of raw tool data for user).
+    *   T2.4.6: Run updated `ToolPanel` component test and confirm pass.
+*   **T2.5: Implement Enhanced Error Handling:**
+    *   T2.5.1: Add try-catch blocks and specific error handling around WebRTC setup and data channel communication on both frontend and backend (refine Phase 1 where needed).
+    *   T2.5.2: Add specific error checks and responses for the `/token` endpoint failures (refine Phase 1 where needed).
+    *   T2.5.3: Add error handling within the backend tool execution logic (e.g., tool function throws error).
+    *   T2.5.4: Implement frontend components/logic to display user-friendly error messages (refine Phase 1 where needed).
+    *   T2.5.5: Enhance existing tests (T1.2.5, T1.3.10, T2.2.7, T2.4.5) to cover error scenarios and verify correct error propagation/display.
+    *   T2.5.6: Run enhanced error handling tests and confirm pass.
+*   **T2.6: End-to-End (E2E) and Manual Testing:**
+    *   T2.6.1: Manually/E2E test triggering the `display_color_palette` tool via a user prompt.
+    *   T2.6.2: Manually/E2E verify backend correctly detects `function_call`, executes tool, sends `tool_result` back to OpenAI.
+    *   T2.6.3: Manually/E2E verify the AI generates a final response based on the tool result.
+    *   T2.6.4: Manually/E2E verify the frontend correctly displays status (if implemented) and the final AI response.
+    *   T2.6.5: Manually/E2E test various error scenarios (tool failure, connection drops during tool call) and verify graceful handling and user feedback.
+*   **T2.7: Document Phase 2 Implementation:**
+    *   T2.7.1: Update `documentation/jarvis_documentation/backend_documentation.md` detailing the tool definition/registration process, tool execution flow (detection, execution, result handling), and the rudimentary Orchestrator logic.
+    *   T2.7.2: Update `documentation/jarvis_documentation/frontend_documentation.md` covering the enhancements to `ToolPanel.jsx` or related components for tool visualization and status/error feedback.
+    *   T2.7.3: Update `documentation/jarvis_documentation/jarvis_architecture.md` to illustrate the simple tool-use flow involving the Orchestrator.
+    *   T2.7.4: Ensure `documentation/jarvis_documentation/README.md` reflects Phase 2 completion status.
+
+## 4. Assumptions
+
+*   Phase 1 features (backend server, WebRTC, `/token`, transcription, basic memory) are implemented and functional.
+*   Understanding of OpenAI's function calling/tool use API and event flow.
+
+## 5. Out of Scope for Phase 2
+
+*   Complex agent frameworks (Triage/PM/Task Agents).
+*   More advanced tools requiring external API calls (e.g., web search).
+*   Persistent memory across sessions.
+*   Vision capabilities.
+*   External access.
+*   Proactive features. 

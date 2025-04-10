@@ -1,0 +1,140 @@
+# Jarvis - Product Requirements Document - Phase 4
+
+**Phase:** 4 - Advanced Agent Framework & Personalization
+**Version:** 1.0
+**Date:** 2024-07-28
+
+## 1. Goals
+
+*   Implement the full hierarchical agent structure (Orchestrator -> Project Manager -> Task Agents) for complex task decomposition and execution.
+*   Introduce persistent memory, allowing Jarvis to recall information and preferences across sessions.
+*   Begin implementing personalization based on learned user preferences.
+*   Add more advanced agent capabilities (e.g., basic vision, document interaction).
+*   Incorporate basic proactive assistance features.
+*   Enhance configuration options and prepare for potential external access.
+*   Focus on overall polish, security hardening, and reliability.
+
+## 2. Features
+
+*   **F4.1: Hierarchical Agent Framework:**
+    *   Enhance Orchestrator: When a complex task requires decomposition, the Orchestrator now delegates to a newly created Project Manager (PM) Agent.
+    *   Project Manager (PM) Agent: Receives the overall task goal from the Orchestrator. Analyzes the goal, breaks it down into sub-tasks, and creates/delegates these sub-tasks to specialized Task Agents.
+    *   Specialized Task Agents: Implement distinct Task Agents optimized for specific functions (e.g., Web Researcher Agent, Data Analyst Agent, File Management Agent). The PM Agent chooses the appropriate Task Agent(s) for each sub-task.
+    *   Agent Communication Bus/Protocol: Implement a robust mechanism for agents (Orchestrator, PM, Task Agents) to communicate status, results, and potentially collaborate.
+*   **F4.2: Persistent Memory:**
+    *   Implement a database (e.g., PostgreSQL, MongoDB, specialized vector DB) to store conversation history, user preferences, and key facts learned across sessions.
+    *   Develop mechanisms to retrieve relevant memories and inject them into the AI's context appropriately, balancing context window limits.
+    *   Consider strategies for summarizing older memories or prioritizing relevant information.
+*   **F4.3: Basic Personalization:**
+    *   Allow users to explicitly state preferences (e.g., "Always use a formal tone," "My favorite color is blue"). Store these in persistent memory.
+    *   Modify system prompts or inject stored preferences into the context to influence AI responses and behavior.
+    *   Potentially start tracking implicit preferences based on user interactions (more advanced, might defer).
+*   **F4.4: Advanced Capability - Vision (Basic):**
+    *   Allow users to upload images via the frontend.
+    *   Integrate with a vision model (e.g., GPT-4 Vision API) via a dedicated tool/agent.
+    *   Enable Jarvis to describe the content of uploaded images.
+*   **F4.5: Proactive Assistance (Basic):**
+    *   Implement simple triggers for proactive suggestions. Example: If the user frequently asks for a weather report around the same time, Jarvis could offer it proactively.
+    *   Requires backend monitoring of usage patterns or specific predefined triggers.
+*   **F4.6: Enhanced Configuration:**
+    *   Frontend UI elements to allow users to configure aspects like AI persona/voice (if multiple options become available), possibly toggle specific tools, or manage stored preferences.
+*   **F4.7: Security Hardening & Polish:**
+    *   Conduct a security review of the backend, especially autournd tool execution, API key handling, and potential external access points.
+    *   Refine UI/UX based on usage feedback.
+    *   Improve logging and monitoring.
+*   **F4.8: Preparation for External Access:**
+    *   Implement basic authentication/authorization mechanism (e.g., simple login).
+    *   Ensure backend infrastructure is configured securely for potential exposure beyond localhost (e.g., firewall rules, HTTPS).
+
+## 3. Tasks & Subtasks
+
+*   **T4.1: Implement Hierarchical Agent Framework:**
+    *   T4.1.1: Design the PM Agent logic for task decomposition and Task Agent selection.
+    *   T4.1.2: Implement the PM Agent component.
+    *   T4.1.3: Update Orchestrator to delegate to PM Agent for complex tasks.
+    *   T4.1.4: Implement 2-3 specialized Task Agent examples (e.g., refine Web Researcher, add File Reader).
+    *   T4.1.5: Implement the inter-agent communication system.
+    *   T4.1.6: Create unit/integration tests for PM Agent logic (task decomposition, agent selection).
+    *   T4.1.7: Run PM Agent tests and confirm pass.
+    *   T4.1.8: Create unit tests for specialized Task Agents.
+    *   T4.1.9: Run specialized Task Agent tests and confirm pass.
+    *   T4.1.10: Create integration tests for the full Orchestrator -> PM -> Task Agent flow.
+    *   T4.1.11: Run full agent framework integration tests and confirm pass.
+*   **T4.2: Implement Persistent Memory:**
+    *   T4.2.1: Choose and set up a database.
+    *   T4.2.2: Define database schema for storing sessions, conversations, preferences.
+    *   T4.2.3: Implement backend logic to save/retrieve conversation history and preferences to/from the DB.
+    *   T4.2.4: Develop context injection strategy using persistent memory.
+    *   T4.2.5: Create integration tests for database interactions (saving, retrieving, deleting session data/preferences).
+    *   T4.2.6: Run database interaction tests and confirm pass.
+    *   T4.2.7: Create unit/integration tests for the context injection strategy using mocked/real DB data.
+    *   T4.2.8: Run context injection strategy tests and confirm pass.
+*   **T4.3: Implement Basic Personalization:**
+    *   T4.3.1: Implement backend logic to store explicitly stated user preferences (leverages T4.2.3).
+    *   T4.3.2: Modify context generation to include relevant preferences (leverages T4.2.4).
+    *   T4.3.3: Test AI behavior changes based on set preferences (Requires E2E testing in T4.9).
+*   **T4.4: Integrate Basic Vision Capability:**
+    *   T4.4.1: Add image upload functionality to the frontend.
+    *   T4.4.2: Create a `describe_image` tool/agent on the backend.
+    *   T4.4.3: Implement logic to call the vision model API with the image data.
+    *   T4.4.4: Handle passing the image description back through the agent system to the user.
+    *   T4.4.5: Create frontend component test for image upload UI.
+    *   T4.4.6: Run image upload UI test and confirm pass.
+    *   T4.4.7: Create integration test for `describe_image` tool/agent (requires mocking vision API).
+    *   T4.4.8: Run `describe_image` tool/agent test and confirm pass.
+*   **T4.5: Implement Basic Proactive Assistance:**
+    *   T4.5.1: Design trigger conditions for proactive suggestions.
+    *   T4.5.2: Implement backend logic to monitor for triggers.
+    *   T4.5.3: Implement mechanism for backend to initiate a message/suggestion to the frontend.
+    *   T4.5.4: Create unit tests for trigger monitoring logic.
+    *   T4.5.5: Run trigger monitoring tests and confirm pass.
+    *   T4.5.6: Create unit/integration tests for the proactive message initiation mechanism.
+    *   T4.5.7: Run proactive message initiation tests and confirm pass.
+*   **T4.6: Implement Enhanced Configuration UI:**
+    *   T4.6.1: Design frontend settings panel.
+    *   T4.6.2: Implement UI components for configuration options.
+    *   T4.6.3: Connect UI to backend endpoints for saving/retrieving settings (likely uses memory/preference storage from T4.2).
+    *   T4.6.4: Create frontend component tests for the settings panel UI and interactions.
+    *   T4.6.5: Run settings panel tests and confirm pass.
+*   **T4.7: Security Hardening & Polish:**
+    *   T4.7.1: Review dependencies for vulnerabilities.
+    *   T4.7.2: Review API key handling and storage.
+    *   T4.7.3: Implement input validation for tool use.
+    *   T4.7.4: Refine UI based on usability testing/feedback.
+    *   T4.7.5: Improve backend logging detail and structure.
+    *   (Note: Testing for this involves code reviews, potentially static analysis tools, and refining existing tests to include security aspects like input validation).
+*   **T4.8: Prepare for External Access:**
+    *   T4.8.1: Implement a simple user authentication flow (e.g., username/password or OAuth).
+    *   T4.8.2: Ensure API endpoints require authentication.
+    *   T4.8.3: Configure server for HTTPS.
+    *   T4.8.4: Review firewall/network configurations.
+    *   T4.8.5: Create integration tests for authentication flow (login, protected endpoint access).
+    *   T4.8.6: Run authentication flow tests and confirm pass.
+*   **T4.9: End-to-End (E2E) and Manual Testing:**
+    *   T4.9.1: Manually/E2E test complex task execution using the full hierarchical agent framework.
+    *   T4.9.2: Manually/E2E test persistent memory across multiple sessions (login, interact, logout, login again, check memory).
+    *   T4.9.3: Manually/E2E test personalization features (set preference, observe behavior change).
+    *   T4.9.4: Manually/E2E test vision capability with various images.
+    *   T4.9.5: Manually/E2E test proactive suggestion triggers.
+    *   T4.9.6: Manually/E2E test configuration UI and its effect.
+    *   T4.9.7: Manually perform basic security checks (e.g., attempting access without login) and test authentication.
+*   **T4.10: Document Phase 4 Implementation:**
+    *   T4.10.1: Update `documentation/jarvis_documentation/backend_documentation.md` with details on the hierarchical agent framework (PM Agent, inter-agent communication), persistent memory implementation (database schema, context injection), personalization logic, vision tool integration, proactive assistance triggers, authentication, and security measures.
+    *   T4.10.2: Significantly update `documentation/jarvis_documentation/specialized_agents_inventory.md` to include the Project Manager Agent and the specialized Task Agents (Web Researcher, File Reader, Vision Agent, etc.) created in this phase.
+    *   T4.10.3: Update `documentation/jarvis_documentation/frontend_documentation.md` detailing the image upload UI, configuration panel, and any UI changes related to personalization or authentication.
+    *   T4.10.4: Update `documentation/jarvis_documentation/jarvis_architecture.md` to show the full hierarchical agent flow, the persistent memory component, and external access considerations.
+    *   T4.10.5: Ensure `documentation/jarvis_documentation/README.md` reflects the state of the application after Phase 4, potentially including setup instructions with database and authentication details.
+
+## 4. Assumptions
+
+*   Phase 1, 2, & 3 features are implemented and stable.
+*   Access to necessary APIs (Vision, potentially others).
+*   Database infrastructure is available.
+
+## 5. Out of Scope for Phase 4 (Potential Future Phases)
+
+*   Highly advanced reasoning, planning, and self-correction in agents.
+*   Deep integration with external services/devices beyond basic examples.
+*   Multi-user collaboration features.
+*   Advanced proactive assistance based on complex event monitoring.
+*   Full deployment pipeline and scalability optimizations. 
